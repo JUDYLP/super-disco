@@ -124,7 +124,7 @@
 |---|---|
 | JDK | 17+ |
 | MySQL | 8.0+ |
-| Node.js | 18+ |
+| Node.js | 20.19+ 或 22.12+（Vite 8 要求） |
 | Redis | 可选 |
 
 ### 1. 配置环境变量
@@ -179,7 +179,9 @@ docker-compose up -d --build
 | 字段 | 值 |
 |------|-----|
 | 邮箱 | demo@test.com |
-| 密码 | demo123 |
+| 密码 | password |
+
+> ⚠️ 该账户仅用于本地演示，BCrypt 哈希为 Spring Security 公开测试向量。生产部署请删除或修改该种子数据。
 
 ## API 接口
 

@@ -12,6 +12,7 @@ import com.example.personalfinance.entity.Bill;
 import com.example.personalfinance.entity.Category;
 import com.example.personalfinance.service.IBillService;
 import com.example.personalfinance.service.ICategoryService;
+import com.example.personalfinance.vo.BillVO;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import org.springframework.util.StringUtils;
@@ -43,7 +44,7 @@ public class BillController {
 
     @PostMapping
     @RequireRole({"ADMIN", "USER"})
-    public ApiResponse<Bill> add(@Valid @RequestBody BillCreateDTO request) {
+    public ApiResponse<BillVO> add(@Valid @RequestBody BillCreateDTO request) {
         validateCategory(request.getCategoryId(), request.getType());
 
         Bill bill = new Bill();
@@ -61,12 +62,12 @@ public class BillController {
         if (!saved || bill.getId() == null) {
             return ApiResponse.failure("failed to add bill");
         }
-        return ApiResponse.success("bill added successfully", bill);
+        return ApiResponse.success("bill added successfully", BillVO.from(bill));
     }
 
     @PutMapping("/{id}")
     @RequireRole({"ADMIN", "USER"})
-    public ApiResponse<Bill> update(@PathVariable Long id, @Valid @RequestBody BillUpdateDTO request) {
+    public ApiResponse<BillVO> update(@PathVariable Long id, @Valid @RequestBody BillUpdateDTO request) {
         if (!id.equals(request.getId())) {
             throw new IllegalArgumentException("path id and request id do not match");
         }
@@ -96,7 +97,7 @@ public class BillController {
         if (!updated) {
             return ApiResponse.failure("failed to update bill");
         }
-        return ApiResponse.success("bill updated successfully", existingBill);
+        return ApiResponse.success("bill updated successfully", BillVO.from(existingBill));
     }
 
     @DeleteMapping("/{id}")
@@ -121,7 +122,7 @@ public class BillController {
     }
 
     @GetMapping
-    public ApiResponse<Page<Bill>> list(
+    public ApiResponse<Page<BillVO>> list(
             @ModelAttribute BillQueryDTO query,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -148,7 +149,8 @@ public class BillController {
         wrapper.orderByDesc(Bill::getConsumeDate).orderByDesc(Bill::getId);
 
         Page<Bill> result = billService.page(new Page<>(page, size), wrapper);
-        return ApiResponse.success("bill list loaded successfully", result);
+        Page<BillVO> voPage = result.convert(BillVO::from);
+        return ApiResponse.success("bill list loaded successfully", voPage);
     }
 
     private void validateCategory(Long categoryId, String type) {

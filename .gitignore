@@ -1,10 +1,8 @@
 target/
 node_modules/
 finance-ui/node_modules/
-finance-web/node_modules/
 dist/
 finance-ui/dist/
-finance-web/dist/
 .idea/
 .vscode/
 *.log

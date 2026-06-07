@@ -7,6 +7,7 @@ import com.example.personalfinance.entity.Category;
 import com.example.personalfinance.service.IBillService;
 import com.example.personalfinance.service.ICategoryService;
 import com.example.personalfinance.service.IStatisticsService;
+import com.example.personalfinance.vo.BillVO;
 import com.example.personalfinance.vo.CategoryStatVO;
 import com.example.personalfinance.vo.DashboardVO;
 import java.math.BigDecimal;
@@ -74,11 +75,15 @@ public class StatisticsServiceImpl implements IStatisticsService {
         recentWrapper.orderByDesc(Bill::getConsumeDate).orderByDesc(Bill::getId);
         List<Bill> recentBills = billService.page(new Page<>(1, 5), recentWrapper).getRecords();
 
+        List<BillVO> recentBillVOs = recentBills.stream()
+                .map(BillVO::from)
+                .collect(Collectors.toList());
+
         DashboardVO dashboard = new DashboardVO();
         dashboard.setMonthIncome(income);
         dashboard.setMonthExpense(expense);
         dashboard.setMonthBalance(income.subtract(expense));
-        dashboard.setRecentBills(recentBills);
+        dashboard.setRecentBills(recentBillVOs);
 
         return dashboard;
     }
