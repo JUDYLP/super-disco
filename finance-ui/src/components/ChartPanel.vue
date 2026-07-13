@@ -1,19 +1,19 @@
 <template>
   <section class="chart-panel">
-    <div class="chart-wrapper">
-      <div ref="chartRef" class="chart-donut"></div>
-      <div class="chart-center">
-        <span class="center-value">{{ formatAmount(totalAmount) }}</span>
-        <span class="center-label">{{ t.total }}</span>
+    <div class="chart-wrap">
+      <div ref="chartRef" class="chart"></div>
+      <div class="center">
+        <span class="cv">{{ fmt(total) }}</span>
+        <span class="cl">{{ t.totalSpent }}</span>
       </div>
     </div>
-    <div class="chart-legend">
-      <div v-for="(item, i) in legendData" :key="i" class="legend-item">
-        <span class="legend-dot" :style="{ background: item.color, boxShadow: `0 0 6px ${item.color}40` }"></span>
-        <span class="legend-name">{{ item.name }}</span>
-        <span class="legend-value">{{ formatAmount(item.value) }}</span>
+    <div class="legend">
+      <div v-for="(item,i) in legendData" :key="i" class="leg-row">
+        <span class="leg-dot" :style="{background:item.color}"></span>
+        <span class="leg-name">{{ item.name }}</span>
+        <span class="leg-val">{{ fmt(item.value) }}</span>
       </div>
-      <div v-if="legendData.length === 0" class="legend-empty">{{ t.noBills }}</div>
+      <div v-if="legendData.length===0" class="leg-empty">{{ t.noTransactions }}</div>
     </div>
   </section>
 </template>
@@ -22,194 +22,38 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import { useI18n } from '../i18n/locale'
-
-const props = defineProps({
-  chartData: { type: Array, default: () => [] }
-})
-
+const props = defineProps({ chartData:{type:Array,default:()=>[]} })
 const { language, t } = useI18n()
 const chartRef = ref(null)
-let chartInstance = null
+let inst = null
+const colors = ['#6c83ff','#00e89d','#f5a623','#ff5c72','#06B6D4','#8B5CF6','#10B981','#F97316']
+const total = computed(()=>props.chartData.reduce((s,i)=>s+(Number(i.amount)||0),0))
+const legendData = computed(()=>props.chartData.map((item,i)=>({name:item.category_name||item.name,value:Number(item.amount)||0,color:colors[i%colors.length]})))
+const fmt = (v)=>{const n=Number(v)||0;const l=language.value==='zh'?'zh-CN':'en-US';const c=language.value==='zh'?'CNY':'USD';return new Intl.NumberFormat(l,{style:'currency',currency:c,maximumFractionDigits:0}).format(n)}
 
-const colors = ['#6c7cff', '#00e89d', '#ffb347', '#ff4d6a', '#06B6D4', '#8B5CF6', '#10B981', '#F97316']
-
-const totalAmount = computed(() =>
-  props.chartData.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
-)
-
-const legendData = computed(() =>
-  props.chartData.map((item, i) => ({
-    name: item.category_name || item.name,
-    value: Number(item.amount) || 0,
-    color: colors[i % colors.length]
-  }))
-)
-
-const formatAmount = (value) => {
-  const locale = language.value === 'zh' ? 'zh-CN' : 'en-US'
-  const currency = language.value === 'zh' ? 'CNY' : 'USD'
-  const symbol = language.value === 'zh' ? '￥' : '$'
-  return symbol + Number(value).toLocaleString(locale, { maximumFractionDigits: 0 })
+const render = () => {
+  if(!chartRef.value)return; if(!inst)inst=echarts.init(chartRef.value)
+  const data=props.chartData.map(item=>({name:item.category_name||item.name,value:Number(item.amount)||0}))
+  inst.setOption({series:[{type:'pie',radius:['65%','84%'],center:['50%','50%'],data,padAngle:2,itemStyle:{borderColor:'#0f111a',borderRadius:3,borderWidth:2},color:colors,label:{show:false},emphasis:{scale:true,scaleSize:4,label:{show:false}}}],tooltip:{trigger:'item',backgroundColor:'rgba(16,18,28,0.96)',borderColor:'rgba(255,255,255,0.06)',textStyle:{color:'#e8ecf4',fontSize:13},formatter:'{b}: {c} ({d}%)',extraCssText:'border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);'}})
 }
 
-const renderChart = () => {
-  if (!chartRef.value) return
-  if (!chartInstance) chartInstance = echarts.init(chartRef.value)
-
-  const seriesData = props.chartData.map((item) => ({
-    name: item.category_name || item.name,
-    value: Number(item.amount) || 0
-  }))
-
-  if (seriesData.length === 0) {
-    chartInstance.setOption({ series: [{ type: 'pie', data: [] }] })
-    return
-  }
-
-  chartInstance.setOption({
-    series: [{
-      type: 'pie',
-      radius: ['70%', '88%'],
-      center: ['50%', '50%'],
-      data: seriesData,
-      padAngle: 3,
-      itemStyle: {
-        borderColor: 'transparent',
-        borderRadius: 4,
-        borderWidth: 0
-      },
-      color: colors,
-      animationDuration: 800,
-      animationEasing: 'cubicOut',
-      label: { show: false },
-      emphasis: {
-        scale: true,
-        scaleSize: 6,
-        label: { show: false },
-        itemStyle: {
-          shadowBlur: 20,
-          shadowColor: 'rgba(108, 124, 255, 0.3)'
-        }
-      }
-    }],
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: 'rgba(16, 21, 42, 0.92)',
-      borderColor: 'rgba(108, 124, 255, 0.15)',
-      borderWidth: 1,
-      textStyle: { color: '#e8ecf4', fontSize: 12 },
-      formatter: '{b}: {c} ({d}%)',
-      extraCssText: 'backdrop-filter: blur(12px); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);'
-    }
-  })
-}
-
-onMounted(() => {
-  renderChart()
-  window.addEventListener('resize', () => chartInstance?.resize())
-})
-
-onBeforeUnmount(() => {
-  chartInstance?.dispose()
-})
-
-watch(
-  [() => props.chartData, () => language.value],
-  () => renderChart(),
-  { deep: true }
-)
+onMounted(()=>{render();window.addEventListener('resize',()=>inst?.resize())})
+onBeforeUnmount(()=>{inst?.dispose()})
+watch([()=>props.chartData,()=>language.value],()=>render(),{deep:true})
 </script>
 
 <style scoped>
-.chart-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
+.chart-panel { display:flex; flex-direction:column; gap:var(--s-3); }
+.chart-wrap { position:relative; height:200px; }
+.chart { width:100%; height:100%; }
+.center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }
+.cv { display:block; font-size:var(--fs-lg); font-weight:var(--fw-bold); color:var(--text-primary); }
+.cl { display:block; font-size:var(--fs-xs); color:var(--text-tertiary); }
 
-.chart-wrapper {
-  position: relative;
-  height: 220px;
-}
-
-.chart-donut {
-  width: 100%;
-  height: 100%;
-}
-
-.chart-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: none;
-}
-
-.center-value {
-  font-size: 18px;
-  font-weight: var(--weight-semibold);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  line-height: 1.2;
-  text-shadow: 0 0 16px rgba(108, 124, 255, 0.1);
-}
-
-.center-label {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
-}
-
-.chart-legend {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) 0;
-  transition: all var(--motion-fast);
-}
-
-.legend-item:hover {
-  padding-left: var(--space-1);
-}
-
-.legend-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.legend-name {
-  flex: 1;
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.legend-value {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.legend-empty {
-  padding: var(--space-4) 0;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-}
+.legend { display:flex; flex-direction:column; gap:2px; }
+.leg-row { display:flex; align-items:center; gap:var(--s-2); padding:2px 0; }
+.leg-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.leg-name { flex:1; font-size:var(--fs-xs); color:var(--text-secondary); }
+.leg-val { font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--text-primary); font-variant-numeric:tabular-nums; }
+.leg-empty { text-align:center; padding:var(--s-4) 0; color:var(--text-tertiary); font-size:var(--fs-xs); }
 </style>
