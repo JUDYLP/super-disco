@@ -17,7 +17,7 @@
       </div>
     </header>
 
-    <!-- AI Insights -->
+    <!-- Smart Analysis -->
     <section class="ai-panel card">
       <div class="ai-header">
         <div class="ai-badge">
@@ -179,7 +179,7 @@ const monthLabel = computed(() => {
   return new Date().toLocaleDateString(locale, { month: 'long', year: 'numeric' })
 })
 
-/* ── AI Insights ── */
+/* ── Smart Analysis ── */
 const aiInsights = computed(() => {
   const insights = []
   const sr = savingsRate.value
@@ -221,27 +221,15 @@ const savingsHint = computed(() => {
 })
 
 const kpiMetrics = computed(() => [
-  { key: 'assets',   label: t.value.kpiTotalAssets,  value: dashboard.month_income + 85200, hint: t.value.incInvestments, tone: 'accent' },
   { key: 'income',   label: t.value.kpiMonthlyIncome, value: dashboard.month_income, hint: t.value.thisMonth, tone: 'success' },
   { key: 'expense',  label: t.value.kpiMonthlyExpense, value: dashboard.month_expense, hint: t.value.thisMonth, tone: 'danger' },
   { key: 'balance',  label: t.value.kpiNetCashFlow,  value: dashboard.month_balance, hint: t.value.incomeMinusExpense, tone: 'neutral' },
   { key: 'savings',  label: t.value.kpiSavingsRate,  value: savingsRate.value, hint: t.value.incomePctSaved, tone: 'accent', isPct: true },
-  { key: 'networth', label: t.value.kpiNetWorth,     value: 128400, hint: t.value.assetsMinusLiabilities, tone: 'neutral' },
 ])
 
-const upcomingBills = [
-  { name: 'Rent', date: 'Jul 1', amount: 3200, color: '#6c83ff' },
-  { name: 'Netflix', date: 'Jul 3', amount: 15.99, color: '#ff5c72' },
-  { name: 'Spotify', date: 'Jul 5', amount: 9.99, color: '#00e89d' },
-  { name: 'Electric Bill', date: 'Jul 10', amount: 145, color: '#f5a623' },
-]
+const upcomingBills = []
 
-const budgetGoals = computed(() => [
-  { name: t.value.budgetNameDining, spent: 680, total: 1000, pct: 68 },
-  { name: t.value.budgetNameEntertainment, spent: 420, total: 500, pct: 84 },
-  { name: t.value.budgetNameGroceries, spent: 520, total: 800, pct: 65 },
-  { name: t.value.budgetNameShopping, spent: 890, total: 1000, pct: 89 },
-])
+const budgetGoals = computed(() => [])
 
 const recentBills = computed(() => bills.value.slice(0, 8))
 
@@ -365,7 +353,7 @@ watch(language,()=>{updateAreaChart();updateDonutChart()})
 }
 .btn-ghost:hover { border-color: var(--border-strong); background: var(--bg-hover); }
 
-/* ── AI Panel ── */
+/* ── Smart Analysis Panel ── */
 .ai-panel { padding: var(--s-5) var(--s-6); margin-bottom: var(--s-6); }
 .ai-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s-4); }
 .ai-badge { display: flex; align-items: center; gap: var(--s-2); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--accent); }
@@ -462,7 +450,7 @@ watch(language,()=>{updateAreaChart();updateDonutChart()})
 
 .receipt-section { margin-bottom: var(--s-8); }
 
-@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .charts-row { grid-template-columns: 1fr; } }
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .charts-row { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .content-split { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
