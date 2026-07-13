@@ -15,6 +15,7 @@ import com.example.personalfinance.service.ICategoryService;
 import com.example.personalfinance.vo.BillVO;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,7 @@ public class BillController {
 
     @PostMapping
     @RequireRole({"ADMIN", "USER"})
+    @Transactional
     public ApiResponse<BillVO> add(@Valid @RequestBody BillCreateDTO request) {
         validateCategory(request.getCategoryId(), request.getType());
 
@@ -67,6 +69,7 @@ public class BillController {
 
     @PutMapping("/{id}")
     @RequireRole({"ADMIN", "USER"})
+    @Transactional
     public ApiResponse<BillVO> update(@PathVariable Long id, @Valid @RequestBody BillUpdateDTO request) {
         if (!id.equals(request.getId())) {
             throw new IllegalArgumentException("path id and request id do not match");

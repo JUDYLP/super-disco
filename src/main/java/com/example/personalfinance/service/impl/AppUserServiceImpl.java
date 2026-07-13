@@ -20,6 +20,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class AppUserServiceImpl extends ServiceImpl<AppUserMapper, AppUser> implements IAppUserService {
 
@@ -43,6 +45,7 @@ public class AppUserServiceImpl extends ServiceImpl<AppUserMapper, AppUser> impl
     private static final Set<String> VALID_ROLES = Set.of("ADMIN", "USER", "VIEWER");
 
     @Override
+    @Transactional
     public LoginVO register(RegisterDTO request) {
         validatePassword(request.getPassword());
 
@@ -99,6 +102,7 @@ public class AppUserServiceImpl extends ServiceImpl<AppUserMapper, AppUser> impl
     }
 
     @Override
+    @Transactional
     public void updateUserRole(Long userId, String newRole) {
         if (!VALID_ROLES.contains(newRole)) {
             throw new IllegalArgumentException("role must be ADMIN, USER, or VIEWER");

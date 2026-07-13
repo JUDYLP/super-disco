@@ -380,7 +380,7 @@ watch(language,()=>{updateAreaChart();updateDonutChart()})
 .ai-insight p { font-size: var(--fs-sm); color: var(--text-secondary); line-height: var(--lh-relaxed); margin: 0; }
 
 /* ── KPI Grid ── */
-.kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
 .kpi-card { padding: var(--s-4) var(--s-5); display: flex; flex-direction: column; gap: var(--s-1); transition: box-shadow var(--dur-fast); }
 .kpi-card:hover { box-shadow: var(--shadow-md); }
 .kpi-label { font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: var(--ls-caps); }
